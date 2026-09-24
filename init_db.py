@@ -1,26 +1,28 @@
-import os
+import asyncio
 from datetime import date, datetime, timedelta
+
 from dotenv import load_dotenv
 from sqlalchemy.orm import Session
 
 # Load environment variables BEFORE importing main.py
 load_dotenv(".env")
-from main import User, Book, Checkout, engine, initialize_database
+from main import Book, Checkout, User, engine, initialize_database
+
 
 def init_database():
     """Initialize the database with sample data"""
 
-    initialize_database()
-    
+    asyncio.run(initialize_database())
+
     with Session(engine) as session:
         # Check if data already exists
         existing_users = session.query(User).count()
         if existing_users > 0:
             print("Database already contains data. Skipping initialization.")
             return
-        
+
         print("Initializing database with sample data...")
-        
+
         # Create sample users
         users = [
             User(
@@ -30,7 +32,7 @@ def init_database():
                 member_since=date(2006, 4, 15),
                 fine_balance=0.00,
                 address="5432 Street",
-                phone_number="5555555555"
+                phone_number="5555555555",
             ),
             User(
                 user_id=123456,
@@ -39,7 +41,7 @@ def init_database():
                 member_since=date(2010, 8, 22),
                 fine_balance=2.50,
                 address="1234 Avenue",
-                phone_number="5551234567"
+                phone_number="5551234567",
             ),
             User(
                 user_id=555555,
@@ -48,7 +50,7 @@ def init_database():
                 member_since=date(2015, 1, 10),
                 fine_balance=0.00,
                 address="9876 Boulevard",
-                phone_number="5559876543"
+                phone_number="5559876543",
             ),
             User(
                 user_id=111111,
@@ -57,10 +59,10 @@ def init_database():
                 member_since=date(2020, 3, 5),
                 fine_balance=0.00,
                 address="777 Park Lane",
-                phone_number="5557778888"
-            )
+                phone_number="5557778888",
+            ),
         ]
-        
+
         # Create sample books
         books = [
             Book(
@@ -72,7 +74,7 @@ def init_database():
                 pages=180,
                 genre="Fiction",
                 location="3rd Floor, A-12",
-                is_available=False  # Checked out by Morten
+                is_available=False,  # Checked out by Morten
             ),
             Book(
                 isbn=9780452284234,
@@ -83,7 +85,7 @@ def init_database():
                 pages=324,
                 genre="Fiction",
                 location="3rd Floor, B-7",
-                is_available=False  # Checked out by Morten
+                is_available=False,  # Checked out by Morten
             ),
             Book(
                 isbn=9780061120084,
@@ -94,7 +96,7 @@ def init_database():
                 pages=288,
                 genre="Science Fiction",
                 location="2nd Floor, C-3",
-                is_available=False  # Checked out by Morten
+                is_available=False,  # Checked out by Morten
             ),
             Book(
                 isbn=9780140449136,
@@ -105,7 +107,7 @@ def init_database():
                 pages=541,
                 genre="Epic Poetry",
                 location="4th Floor, D-1",
-                is_available=True
+                is_available=True,
             ),
             Book(
                 isbn=9780553213119,
@@ -116,7 +118,7 @@ def init_database():
                 pages=720,
                 genre="Fiction",
                 location="3rd Floor, A-15",
-                is_available=True
+                is_available=True,
             ),
             Book(
                 isbn=9780316769174,
@@ -127,7 +129,7 @@ def init_database():
                 pages=214,
                 genre="Fiction",
                 location="3rd Floor, B-3",
-                is_available=False  # Checked out by Jane
+                is_available=False,  # Checked out by Jane
             ),
             Book(
                 isbn=9780451524935,
@@ -138,7 +140,7 @@ def init_database():
                 pages=328,
                 genre="Dystopian Fiction",
                 location="2nd Floor, D-8",
-                is_available=True
+                is_available=True,
             ),
             Book(
                 isbn=9780142437247,
@@ -149,15 +151,15 @@ def init_database():
                 pages=1072,
                 genre="Fiction",
                 location="4th Floor, A-1",
-                is_available=True
-            )
+                is_available=True,
+            ),
         ]
-        
+
         # Add users and books to session
         session.add_all(users)
         session.add_all(books)
         session.commit()
-        
+
         # Create sample checkouts
         now = datetime.now()
         checkouts = [
@@ -166,26 +168,26 @@ def init_database():
                 user_id=987654,
                 isbn=9780743273565,
                 checkout_date=now - timedelta(days=11),
-                due_date=now + timedelta(days=19)
+                due_date=now + timedelta(days=19),
             ),
             Checkout(
                 user_id=987654,
                 isbn=9780452284234,
                 checkout_date=now - timedelta(days=6),
-                due_date=now + timedelta(days=24)
+                due_date=now + timedelta(days=24),
             ),
             Checkout(
                 user_id=987654,
                 isbn=9780061120084,
                 checkout_date=now - timedelta(days=4),
-                due_date=now + timedelta(days=26)
+                due_date=now + timedelta(days=26),
             ),
             # Jane has one book checked out
             Checkout(
                 user_id=123456,
                 isbn=9780316769174,
                 checkout_date=now - timedelta(days=20),
-                due_date=now - timedelta(days=5)  # Overdue!
+                due_date=now - timedelta(days=5),  # Overdue!
             ),
             # Bob returned a book (historical record)
             Checkout(
@@ -193,13 +195,13 @@ def init_database():
                 isbn=9780451524935,
                 checkout_date=now - timedelta(days=40),
                 due_date=now - timedelta(days=10),
-                return_date=now - timedelta(days=12)  # Returned on time
-            )
+                return_date=now - timedelta(days=12),  # Returned on time
+            ),
         ]
-        
+
         session.add_all(checkouts)
         session.commit()
-        
+
         print("Database initialized successfully!")
         print(f"Added {len(users)} users")
         print(f"Added {len(books)} books")
